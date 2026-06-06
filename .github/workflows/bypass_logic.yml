@@ -1,0 +1,22 @@
+name: Patch Logic Bypass
+on: [push]
+
+jobs:
+  bypass:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Force Skip Login
+        run: |
+          # 1. Тіркелуді тексеретін методты іздеу (Samsung-тың Login методы)
+          # Осыған ұқсас методты табу үшін іздейміз:
+          grep -l "isLoggedIn" -r mod_workspace/smali/ | xargs sed -i 's/move-result v0/const\/4 v0, 0x1\nnop/g'
+          
+          # 2. TermsActivity-ді басып тұрған onCreate методтарын тазалау
+          # Барлық TermsActivity.smali файлдарын өшіреміз немесе ішіндегі логиканы тазалаймыз
+          find mod_workspace/smali -name "*TermsActivity*.smali" -exec rm {} \;
+          
+      - name: Build and Sign
+        run: |
+          java -jar apktool.jar b mod_workspace -o bypass_logic.apk
+          java -jar signer.jar -a bypass_logic.apk --allowResign -o final_build/
