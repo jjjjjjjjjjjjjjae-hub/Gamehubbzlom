@@ -21,6 +21,12 @@ jobs:
       - name: APK файлын бұзу (Decompile)
         run: java -jar apktool.jar d gamehub.apk -o mod_workspace
 
+      - name: Mod Menu енгізу
+        run: |
+          mkdir -p mod_workspace/assets
+          cp mod_menu.html mod_workspace/assets/mod_menu.html
+          echo "Мод меню assets папкасына сәтті салынды!"
+
       - name: Бұзылған кодты қайта жинау (Recompile)
         run: java -jar apktool.jar b mod_workspace -o unsigned_mod.apk
 

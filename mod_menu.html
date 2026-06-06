@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Almas offikal Mod Menu</title>
+    <!-- Заманауи геймерлік қаріп -->
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Жалпы баптаулар */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Rajdhani', sans-serif;
+            user-select: none;
+        }
+
+        /* Балқаш (Көгілдір) Түстері */
+        :root {
+            --balkhash-main: #00E5FF; /* Ашық неон көгілдір */
+            --balkhash-dark: #008B8B; /* Қою көк-жасыл */
+            --balkhash-glow: rgba(0, 229, 255, 0.5);
+            --balkhash-bg: rgba(0, 229, 255, 0.15);
+        }
+
+        body {
+            /* Ойын фоны */
+            background: url('https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- ШЫНАЙЫ ОЙЫНШЫ (СИЛУЭТ) --- */
+        .game-scene {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Ойыншы силуэті (Мытықпен көздеп тұрған) */
+        .player-silhouette {
+            position: relative;
+            width: 140px;
+            height: 220px;
+            margin-top: 80px;
+            /* Кішкене көлеңке беріп шынайылық қосу */
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.6));
+        }
+
+        .p-head {
+            position: absolute; top: 0; left: 45px;
+            width: 32px; height: 38px;
+            background: #111;
+            border-radius: 40% 45% 35% 30%;
+            box-shadow: inset -3px -3px 5px rgba(255,255,255,0.1);
+        }
+
+        .p-torso {
+            position: absolute; top: 35px; left: 40px;
+            width: 42px; height: 85px;
+            background: #151515;
+            border-radius: 15px 15px 10px 10px;
+            transform: skewX(-3deg);
+            box-shadow: inset -5px -5px 10px rgba(255,255,255,0.05);
+        }
+
+        /* Артқы қол */
+        .p-arm-b {
+            position: absolute; top: 40px; left: 25px;
+            width: 40px; height: 16px;
+            background: #0a0a0a;
+            border-radius: 8px;
+            transform: rotate(40deg);
+        }
+
+        /* Мылтық */
+        .p-gun {
+            position: absolute; top: 52px; left: 65px;
+            width: 85px; height: 12px;
+            background: #000;
+            border-radius: 2px;
+        }
+        .p-gun::after { /* Магазин */
+            content: ''; position: absolute; top: 10px; left: 25px;
+            width: 14px; height: 22px; background: #000;
+            transform: skewX(-5deg);
+        }
+        .p-gun::before { /* Прицел */
+            content: ''; position: absolute; top: -6px; left: 35px;
+            width: 15px; height: 6px; background: #000;
+        }
+
+        /* Алдыңғы қол */
+        .p-arm-f {
+            position: absolute; top: 45px; left: 55px;
+            width: 45px; height: 16px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            transform: rotate(10deg);
+        }
+
+        /* Артқы аяқ */
+        .p-leg-b {
+            position: absolute; top: 110px; left: 60px;
+            width: 20px; height: 95px;
+            background: #0a0a0a;
+            border-radius: 10px;
+            transform: rotate(-15deg);
+            transform-origin: top center;
+        }
+
+        /* Алдыңғы аяқ */
+        .p-leg-f {
+            position: absolute; top: 115px; left: 40px;
+            width: 22px; height: 90px;
+            background: #111;
+            border-radius: 10px;
+            transform: rotate(12deg);
+            transform-origin: top center;
+        }
+
+        /* --- ESP Элементтері --- */
+        .esp-box {
+            position: absolute;
+            top: -15px; left: -10px; right: -30px; bottom: 0px;
+            border: 2px solid var(--balkhash-main);
+            box-shadow: 0 0 10px var(--balkhash-main), inset 0 0 10px var(--balkhash-glow);
+            background: rgba(0, 229, 255, 0.05); /* Іші аздап көгілдір */
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .esp-line {
+            position: absolute;
+            top: -300px;
+            left: 50%;
+            width: 2px;
+            height: 300px;
+            background: var(--balkhash-main);
+            box-shadow: 0 0 8px var(--balkhash-main);
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .esp-info {
+            position: absolute;
+            top: -45px;
+            width: 200px;
+            text-align: center;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--balkhash-main);
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 1px 1px 3px #000;
+            pointer-events: none;
+        }
+
+        .esp-name { opacity: 0; transition: opacity 0.3s; color: #fff; }
+        .esp-dist { opacity: 0; transition: opacity 0.3s; color: var(--balkhash-main); }
+
+        .show-esp { opacity: 1 !important; }
+
+        /* --- ЗАМАНАУИ MOD MENU (Балқаш Темасы) --- */
+        #mod-menu {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 340px;
+            background: rgba(8, 12, 16, 0.75);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--balkhash-main);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 25px var(--balkhash-glow);
+            z-index: 10;
+            overflow: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .menu-header {
+            background: linear-gradient(135deg, var(--balkhash-dark), var(--balkhash-main));
+            color: white;
+            padding: 15px 20px;
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: grab;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .menu-header:active { cursor: grabbing; }
+
+        .toggle-btn {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .toggle-btn:hover { background: rgba(255,255,255,0.3); }
+
+        .tabs {
+            display: flex;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 5px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            color: #888;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .tab.active {
+            color: #fff;
+            background: var(--balkhash-bg);
+            border: 1px solid var(--balkhash-main);
+            box-shadow: 0 0 10px var(--balkhash-glow);
+        }
+
+        .content {
+            padding: 20px;
+            height: 280px;
+            overflow-y: auto;
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--balkhash-main); border-radius: 10px; }
+
+        .feature {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            color: #ddd;
+            font-size: 16px;
+            background: rgba(255,255,255,0.03);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: 0.3s;
+        }
+        .feature:hover { border-color: var(--balkhash-main); background: rgba(255,255,255,0.08); }
+
+        /* Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(255,255,255,0.1);
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px; width: 16px;
+            left: 3px; bottom: 3px;
+            background-color: #888;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: var(--balkhash-bg);
+            border-color: var(--balkhash-main);
+        }
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: var(--balkhash-main);
+            box-shadow: 0 0 10px var(--balkhash-main);
+        }
+
+        /* Range Slider */
+        .range-container { margin-top: 10px; padding: 0 5px; }
+        .range-header {
+            display: flex; justify-content: space-between;
+            color: #ddd; font-size: 15px; margin-bottom: 8px;
+        }
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 18px; width: 18px;
+            border-radius: 50%; background: var(--balkhash-main);
+            cursor: pointer; margin-top: -6px;
+            box-shadow: 0 0 12px var(--balkhash-main); border: 2px solid #fff;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 6px; cursor: pointer;
+            background: rgba(255,255,255,0.1); border-radius: 5px;
+        }
+
+        /* Floating Icon */
+        #floating-icon {
+            display: none; position: absolute;
+            top: 20px; left: 20px;
+            width: 65px; height: 65px;
+            background: rgba(8, 12, 16, 0.85);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--balkhash-main); border-radius: 50%;
+            color: var(--balkhash-main); font-weight: 700; text-align: center;
+            line-height: 61px; font-size: 15px;
+            cursor: pointer; z-index: 20;
+            box-shadow: 0 0 20px var(--balkhash-glow);
+            letter-spacing: 1px; transition: 0.3s;
+        }
+        #floating-icon:hover { transform: scale(1.1); background: var(--balkhash-bg); }
+    </style>
+</head>
+<body>
+
+    <!-- Артқы фондағы Шынайы Ойыншы -->
+    <div class="game-scene">
+        <div class="player-silhouette">
+            <!-- Дене мүшелері -->
+            <div class="p-head"></div>
+            <div class="p-torso"></div>
+            <div class="p-arm-b"></div>
+            <div class="p-gun"></div>
+            <div class="p-arm-f"></div>
+            <div class="p-leg-b"></div>
+            <div class="p-leg-f"></div>
+            
+            <!-- ESP Визуалды Элементтері -->
+            <div class="esp-box" id="visual-esp-box"></div>
+            <div class="esp-line" id="visual-esp-line"></div>
+            <div class="esp-info">
+                <span class="esp-name" id="visual-esp-name">Pro_Playerkz</span>
+                <span class="esp-dist" id="visual-esp-dist">[32m]</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Қалқымалы Иконка -->
+    <div id="floating-icon" onclick="toggleMenu()">ALMAS</div>
+
+    <!-- Басты Mod Menu -->
+    <div id="mod-menu">
+        <div class="menu-header" id="menu-header">
+            <span>❄ ALMAS OFFIKAL</span>
+            <button class="toggle-btn" onclick="toggleMenu()">✕</button>
+        </div>
+        
+        <div id="menu-body">
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab(event, 'aimbot')">Aimbot</div>
+                <div class="tab" onclick="switchTab(event, 'esp')">ESP</div>
+                <div class="tab" onclick="switchTab(event, 'misc')">Extra</div>
+            </div>
+
+            <div class="content">
+                <!-- Aimbot Бөлімі -->
+                <div id="aimbot" class="tab-content active">
+                    <div class="feature">
+                        <span>Auto Headshot</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="feature">
+                        <span>Aim Lock</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="feature">
+                        <span>Magic Bullet</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="range-container">
+                        <div class="range-header">
+                            <span>Aimbot FOV</span>
+                            <span id="fov-val">90°</span>
+                        </div>
+                        <input type="range" min="0" max="360" value="90" oninput="updateVal('fov-val', this.value + '°')">
+                    </div>
+                </div>
+
+                <!-- ESP Бөлімі -->
+                <div id="esp" class="tab-content">
+                    <div class="feature">
+                        <span>ESP Box (Қорап)</span>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleVis('visual-esp-box', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="feature">
+                        <span>ESP Line (Сызық)</span>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleVis('visual-esp-line', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="feature">
+                        <span>Player Name (Аты)</span>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleVis('visual-esp-name', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="feature">
+                        <span>Distance (Қашықтық)</span>
+                        <label class="switch">
+                            <input type="checkbox" onchange="toggleVis('visual-esp-dist', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Басқа Бөлімі -->
+                <div id="misc" class="tab-content">
+                    <div class="feature">
+                        <span>Speed Hack x5</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="feature">
+                        <span>No Recoil (100%)</span>
+                        <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                    </div>
+                    <div class="feature">
+                        <span>Fly Hack</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                    <div class="feature">
+                        <span>Ghost Mode</span>
+                        <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleVis(elementId, isChecked) {
+            const el = document.getElementById(elementId);
+            if (isChecked) { el.classList.add('show-esp'); } else { el.classList.remove('show-esp'); }
+        }
+        function switchTab(evt, tabName) {
+            let i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.remove("active"); }
+            tablinks = document.getElementsByClassName("tab");
+            for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+        function updateVal(id, val) { document.getElementById(id).innerText = val; }
+
+        let menuVisible = true;
+        const modMenu = document.getElementById('mod-menu');
+        const floatIcon = document.getElementById('floating-icon');
+
+        function toggleMenu() {
+            if (menuVisible) {
+                modMenu.style.opacity = '0';
+                setTimeout(() => { modMenu.style.display = 'none'; }, 300);
+                floatIcon.style.display = 'block';
+                menuVisible = false;
+            } else {
+                modMenu.style.display = 'block';
+                setTimeout(() => { modMenu.style.opacity = '1'; }, 10);
+                floatIcon.style.display = 'none';
+                menuVisible = true;
+            }
+        }
+
+        const menuHeader = document.getElementById("menu-header");
+        let isDragging = false; let startX, startY, initialLeft, initialTop;
+        menuHeader.addEventListener("mousedown", dragStart);
+        document.addEventListener("mousemove", drag);
+        document.addEventListener("mouseup", dragEnd);
+        menuHeader.addEventListener("touchstart", dragStart, {passive: false});
+        document.addEventListener("touchmove", drag, {passive: false});
+        document.addEventListener("touchend", dragEnd);
+
+        function dragStart(e) {
+            if(e.target.classList.contains('toggle-btn')) return; 
+            isDragging = true;
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches.clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches.clientY;
+            startX = clientX; startY = clientY;
+            const rect = modMenu.getBoundingClientRect();
+            initialLeft = rect.left; initialTop = rect.top;
+            modMenu.style.transform = 'none';
+            modMenu.style.left = initialLeft + 'px';
+            modMenu.style.top = initialTop + 'px';
+        }
+        function drag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const clientX = e.type.includes('mouse') ? e.clientX : e.touches.clientX;
+            const clientY = e.type.includes('mouse') ? e.clientY : e.touches.clientY;
+            const dx = clientX - startX; const dy = clientY - startY;
+            modMenu.style.left = (initialLeft + dx) + "px";
+            modMenu.style.top = (initialTop + dy) + "px";
+        }
+        function dragEnd() { isDragging = false; }
+    </script>
+</body>
+</html>
