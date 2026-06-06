@@ -1,0 +1,34 @@
+name: APK Mod Build Tool
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Java орнату
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Қажетті құралдарды жүктеу (Apktool & Signer)
+        run: |
+          wget https://bitbucket.org/iBotPeaches/apktool/downloads/apktool_2.9.3.jar -O apktool.jar
+          wget https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O signer.jar
+
+      - name: APK файлын бұзу (Decompile)
+        run: java -jar apktool.jar d gamehub.apk -o mod_workspace
+
+      - name: Бұзылған кодты қайта жинау (Recompile)
+        run: java -jar apktool.jar b mod_workspace -o unsigned_mod.apk
+
+      - name: Қолтаңба қою (Sign)
+        run: java -jar signer.jar -a unsigned_mod.apk --allowResign -o final_build/
+
+      - name: Дайын файлды Github-та сақтау
+        uses: actions/upload-artifact@v3
+        with:
+          name: GameHub-Ready-APK
+          path: final_build/*.apk
