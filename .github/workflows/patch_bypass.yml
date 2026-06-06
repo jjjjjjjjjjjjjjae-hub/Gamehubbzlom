@@ -1,0 +1,22 @@
+name: Bypass Samsung Auth
+on: [push]
+
+jobs:
+  bypass:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch Manifest
+        run: |
+          # 1. TermsActivity және SamsungAccount сілтемелерін өшіру
+          # AndroidManifest.xml ішіндегі осы Activity-лерді <activity-alias> немесе <activity> бөлігін өшіреміз
+          sed -i '/com.samsung.android.game.gamehome.app.oobe.TermsActivity/,/<\/activity>/d' mod_workspace/AndroidManifest.xml
+          sed -i '/SamsungAccountDataChangeReceiver/,/<\/receiver>/d' mod_workspace/AndroidManifest.xml
+          
+          # 2. Негізгі ланчерді мәжбүрлі түрде MainActivity-ге бағыттау
+          sed -i 's/android:name="com.samsung.android.game.gamehome.app.oobe.TermsActivity"/android:name="com.samsung.android.game.gamehome.app.MainActivity"/g' mod_workspace/AndroidManifest.xml
+          
+      - name: Build and Sign
+        run: |
+          java -jar apktool.jar b mod_workspace -o bypass_final.apk
+          java -jar signer.jar -a bypass_final.apk --allowResign -o final_build/
