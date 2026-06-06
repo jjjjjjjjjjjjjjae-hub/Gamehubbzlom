@@ -1,0 +1,27 @@
+name: GameHub Modder
+on: [push]
+
+jobs:
+  mod:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup
+        run: |
+          wget https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
+          wget https://github.com/patrickfav/uber-apk-signer/releases/download/v1.3.0/uber-apk-signer-1.3.0.jar -O signer.jar
+      - name: Patch & Inject
+        run: |
+          java -jar apktool.jar d gamehub.apk -o workspace
+          # Тіркелу терезесін манифесттен өшіру
+          sed -i '/TermsActivity/d' workspace/AndroidManifest.xml
+          # Mod Menu-ді assets-ке салу
+          cp mod_menu.html workspace/assets/mod_menu.html
+      - name: Rebuild & Sign
+        run: |
+          java -jar apktool.jar b workspace -o modded.apk
+          java -jar signer.jar -a modded.apk --allowResign -o final/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Modded-GameHub
+          path: final/*.apk
