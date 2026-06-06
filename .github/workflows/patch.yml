@@ -1,0 +1,21 @@
+name: Patch Login Activity
+on: [push]
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch TermsActivity
+        run: |
+          # 1. Manifest-те TermsActivity-ді іздеп, оны өшіру немесе MainActivity-ге сілтеу
+          sed -i 's/com.samsung.android.game.gamehome.app.oobe.TermsActivity/com.samsung.android.game.gamehome.app.MainActivity/g' mod_workspace/AndroidManifest.xml
+          
+          # 2. Smali кодтағы login check-ті өшіру (егер бар болса)
+          # Бұл команда TermsActivity-дің onCreate ішіндегі логиканы 'return-void' (бос қайтару) етіп өзгертеді
+          find mod_workspace/smali -name "TermsActivity.smali" -exec sed -i 's/invoke-virtual/nop\ninvoke-virtual/g' {} +
+          
+      - name: Rebuild and Sign
+        run: |
+          java -jar apktool.jar b mod_workspace -o patched.apk
+          java -jar signer.jar -a patched.apk --allowResign -o final_build/
